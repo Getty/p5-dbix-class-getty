@@ -11,6 +11,6 @@ my $schema = TestSchema->deploy_or_connect();
 
 isa_ok($schema,'TestSchema');
 isa_ok($schema->resultset('Data'),'DBIx::Class::Getty::ResultSet');
-isa_ok($schema->resultset('Data')->new({}),'TestSchema::Result::Data');
+isa_ok($schema->resultset('Data')->new_result({}),'TestSchema::Result::Data');
 
 done_testing;

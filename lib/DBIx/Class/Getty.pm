@@ -1,4 +1,5 @@
 package DBIx::Class::Getty;
+# ABSTRACT: Gettys custom DBIx::Class setup
 
 use strict;
 use warnings;
@@ -29,9 +30,11 @@ sub import {
     my $inner_class = substr($target, length($schema)+2);
     my $result_namespace = ( $schema_config{result_namespace} || 'Result' );
     my $resultset_namespace = ( $schema_config{resultset_namespace} || 'ResultSet' );
-    if ($inner_class =~ m/^${result_namespace}::/) {
+    if ($inner_class =~ m/^${result_namespace}::(.+)$/) {
+      $config{result_class} = $1;
       DBIx::Class::Getty::import_result($class,$target,%config);
-    } elsif ($inner_class =~ m/^${resultset_namespace}::/) {
+    } elsif ($inner_class =~ m/^${resultset_namespace}::(.+)$/) {
+      $config{resultset_class} = $1;
       DBIx::Class::Getty::import_resultset($class,$target,%config);
     }
   } else {
@@ -41,10 +44,24 @@ sub import {
 
 sub import_result {
   my ( $class, $target, %config ) = @_;
+  my $no_id = delete $config{no_id};
+  my $table = delete $config{table};
   my $ps = Package::Stash->new($target);
   $ps->add_symbol('&schema_config',sub { $loaded_schemas{$config{schema}} });
   Moo->import::into($target);
   $target->can('extends')->($config{_}->{base_result_class});
+  $target->load_components(qw/
+    HashAccessor
+    EncodedColumn
+    TimeStamp
+    InflateColumn::DateTime
+    InflateColumn::Serializer
+    Helper::Row::OnColumnChange
+    Helper::Row::StorageValues
+    Helper::Row::ProxyResultSetMethod
+    Core
+    +DBICx::Indexing
+  /);
   DBIx::Class::Candy->import::into($target);
 }
 
@@ -75,6 +92,9 @@ sub import_schema {
   $config{default_serialized_data_type} = 'text' unless $config{default_serialized_data_type};
   $config{default_datetime_data_type} = 'timestamp with time zone' unless $config{default_datetime_data_type};
   $config{default_text_data_type} = 'text' unless $config{default_text_data_type};
+  $config{table_name_generator} = sub {
+
+  } unless $config{table_name_generator};
   $loaded_schemas{$target} = { %config };
   $ps->add_symbol('&schema_config',sub { $loaded_schemas{$target} });
   $target->load_namespaces(

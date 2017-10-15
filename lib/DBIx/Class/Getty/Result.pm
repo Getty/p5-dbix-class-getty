@@ -8,19 +8,6 @@ use DateTime;
 use DateTime::TimeZone;
 use Digest::MD5 qw( md5_hex );
 
-__PACKAGE__->load_components(qw/
-  HashAccessor
-  EncodedColumn
-  TimeStamp
-  InflateColumn::DateTime
-  InflateColumn::Serializer
-  Helper::Row::OnColumnChange
-  Helper::Row::StorageValues
-  Helper::Row::ProxyResultSetMethod
-  Core
-  +DBICx::Indexing
-/);
-
 sub random_key {
   my ( $self ) = @_;
   return md5_hex(sprintf('%09d',rand(900_000_000)).sprintf('%09d',rand(900_000_000)).sprintf('%09d',rand(900_000_000)).sprintf('%09d',rand(900_000_000)).sprintf('%09d',rand(900_000_000)).$$);
