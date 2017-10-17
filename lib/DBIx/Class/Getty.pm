@@ -50,18 +50,6 @@ sub import_result {
   $ps->add_symbol('&schema_config',sub { $loaded_schemas{$config{schema}} });
   Moo->import::into($target);
   $target->can('extends')->($config{_}->{base_result_class});
-  $target->load_components(qw/
-    HashAccessor
-    EncodedColumn
-    TimeStamp
-    InflateColumn::DateTime
-    InflateColumn::Serializer
-    Helper::Row::OnColumnChange
-    Helper::Row::StorageValues
-    Helper::Row::ProxyResultSetMethod
-    Core
-    +DBICx::Indexing
-  /);
   DBIx::Class::Candy->import::into($target);
 }
 
